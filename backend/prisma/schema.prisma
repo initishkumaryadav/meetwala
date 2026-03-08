@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String         @id @default(uuid())
+  email          String         @unique
+  name           String?
+  avatarUrl      String?
+  googleId       String         @unique
+  whatsappPhone  String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  hostedMeetings Meeting[]      @relation("MeetingHost")
+  proxySessions  ProxySession[]
+  briefings      Briefing[]
+}
+
+model Meeting {
+  id          String      @id @default(uuid())
+  title       String
+  roomCode    String      @unique
+  hostId      String
+  status      String      @default("SCHEDULED") // SCHEDULED | LIVE | ENDED
+  scheduledAt DateTime?
+  startedAt   DateTime?
+  endedAt     DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  host           User              @relation("MeetingHost", fields: [hostId], references: [id])
+  proxySessions  ProxySession[]
+  transcript     TranscriptEntry[]
+  botEvents      BotEvent[]
+}
+
+model ProxySession {
+  id        String   @id @default(uuid())
+  meetingId String
+  userId    String
+  status    String   @default("IDLE") // IDLE | BRIEFED | ACTIVE | ESCALATING | COMPLETED
+  botName   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  meeting   Meeting        @relation(fields: [meetingId], references: [id])
+  user      User           @relation(fields: [userId], references: [id])
+  briefing  Briefing?
+  botEvents BotEvent[]
+  waQueries WhatsAppQuery[]
+}
+
+model Briefing {
+  id                 String   @id @default(uuid())
+  proxySessionId     String   @unique
+  userId             String
+  rawText            String
+  chromaCollectionId String?
+  chunkCount         Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  proxySession ProxySession @relation(fields: [proxySessionId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+}
+
+model TranscriptEntry {
+  id        String   @id @default(uuid())
+  meetingId String
+  speaker   String
+  text      String
+  isFinal   Boolean  @default(false)
+  timestamp DateTime @default(now())
+
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+}
+
+model BotEvent {
+  id             String   @id @default(uuid())
+  meetingId      String
+  proxySessionId String
+  type           String   // RAG_RESPONSE | LLM_RESPONSE | WHATSAPP_ESCALATION | WHATSAPP_REPLY | SILENCE | JOIN | LEAVE
+  input          String?
+  output         String?
+  latencyMs      Int?
+  timestamp      DateTime @default(now())
+
+  meeting      Meeting      @relation(fields: [meetingId], references: [id])
+  proxySession ProxySession @relation(fields: [proxySessionId], references: [id])
+}
+
+model WhatsAppQuery {
+  id             String    @id @default(uuid())
+  proxySessionId String
+  questionAsked  String
+  sentAt         DateTime  @default(now())
+  replyText      String?
+  repliedAt      DateTime?
+  status         String    @default("PENDING") // PENDING | REPLIED | TIMED_OUT
+
+  proxySession ProxySession @relation(fields: [proxySessionId], references: [id])
+}
