@@ -30,7 +30,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
       args:
         - VITE_API_URL=${APP_URL}/api
         - VITE_SOCKET_URL=${APP_URL}
@@ -43,7 +43,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     container_name: meetwala-backend
     environment:
       - NODE_ENV=production
@@ -78,7 +78,7 @@ services:
   ai-service:
     build:
       context: ./ai-services
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     container_name: meetwala-ai
     environment:
       - PORT=8000

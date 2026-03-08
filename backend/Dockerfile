@@ -5,11 +5,12 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci --omit=dev
 
 COPY . .
 
 RUN npx prisma generate
 
 EXPOSE 4000
-CMD ["npm", "run", "dev"]
+ENV PORT=4000
+CMD ["node", "src/index.js"]

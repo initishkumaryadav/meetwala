@@ -28,7 +28,7 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: meetwala-frontend
     volumes:
       - ./frontend:/app
@@ -46,7 +46,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: meetwala-backend
     volumes:
       - ./backend:/app
@@ -84,7 +84,7 @@ services:
   ai-service:
     build:
       context: ./ai-services
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: meetwala-ai
     volumes:
       - ./ai-services:/app
