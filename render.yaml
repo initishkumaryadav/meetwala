@@ -3,8 +3,8 @@ services:
   - type: web
     name: meetwala-frontend
     runtime: docker
+    rootDir: ./frontend
     dockerfilePath: ./Dockerfile
-    dockerContext: ./frontend
     envVars:
       - key: VITE_API_URL
         sync: false
@@ -15,8 +15,8 @@ services:
   - type: web
     name: meetwala-backend
     runtime: docker
+    rootDir: ./backend
     dockerfilePath: ./Dockerfile
-    dockerContext: ./backend
     envVars:
       - key: NODE_ENV
         value: production
@@ -55,8 +55,8 @@ services:
   - type: web
     name: meetwala-ai
     runtime: docker
+    rootDir: ./ai-services
     dockerfilePath: ./Dockerfile
-    dockerContext: ./ai-services
     envVars:
       - key: OPENAI_API_KEY
         sync: false
