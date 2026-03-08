@@ -1,5 +1,7 @@
 const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
+// Load .env from project root in dev, Railway injects env vars in production
+const envPath = path.resolve(__dirname, "../../.env");
+if (require("fs").existsSync(envPath)) require("dotenv").config({ path: envPath });
 const express    = require("express");
 const http       = require("http");
 const cors       = require("cors");

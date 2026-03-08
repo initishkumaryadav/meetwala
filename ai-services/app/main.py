@@ -1,7 +1,9 @@
 from dotenv import load_dotenv
 from pathlib import Path
-# Load root .env (same one the Node backend uses)
-load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
+# Load root .env in dev; Railway injects env vars in production
+_env = Path(__file__).resolve().parent.parent.parent / ".env"
+if _env.exists():
+    load_dotenv(_env)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
