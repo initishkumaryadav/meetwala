@@ -30,6 +30,7 @@ class BotState(TypedDict):
     collection_name:     str
     transcript:          str
     speaker:             str
+    bot_name:            str
     is_directed_at_bot:  bool
     retrieved_chunks:    list
     confidence_score:    float
@@ -41,14 +42,23 @@ class BotState(TypedDict):
 # ── Node: Classify ────────────────────────────────────
 async def classify_node(state: BotState) -> dict:
     llm    = get_llm(temperature=0.0)
+    bot_name = state.get("bot_name", "AI Proxy")
+
+    # Quick check: if the bot's name isn't mentioned at all, skip LLM call
+    transcript_lower = state["transcript"].lower()
+    if bot_name.lower() not in transcript_lower:
+        logger.debug(f"🎯 Classify: name '{bot_name}' not in transcript — skipping")
+        return {"is_directed_at_bot": False}
+
     prompt = CLASSIFY_PROMPT.format(
         speaker=state["speaker"],
         transcript=state["transcript"],
+        bot_name=bot_name,
     )
     result     = await llm.ainvoke(prompt)
     text       = result.content.strip().lower()
     is_directed = "yes" in text
-    logger.debug(f"🎯 Classify: directed={is_directed}")
+    logger.debug(f"🎯 Classify: directed={is_directed} (bot_name='{bot_name}')")
     return {"is_directed_at_bot": is_directed}
 
 
@@ -108,6 +118,13 @@ async def rag_respond_node(state: BotState) -> dict:
 
 # ── Node: Escalate ────────────────────────────────────
 async def escalate_node(state: BotState) -> dict:
+    # Generate a polite interim response to speak in the meeting
+    escalation_reply = (
+        "I don't have the details on this right now. "
+        "Let me check with my team and I'll get back to you shortly. "
+        "Please feel free to move on to the next point."
+    )
+
     if redis_client:
         await redis_client.setex(
             f"escalation:{state['proxy_session_id']}",
@@ -120,7 +137,7 @@ async def escalate_node(state: BotState) -> dict:
         logger.info(f"📱 Escalation stored for session {state['proxy_session_id']}")
     else:
         logger.warning(f"📱 Redis unavailable — cannot store escalation for {state['proxy_session_id']}")
-    return {"bot_response": None, "should_escalate": True}
+    return {"bot_response": escalation_reply, "should_escalate": True}
 
 
 # ── No-op skip node ───────────────────────────────────

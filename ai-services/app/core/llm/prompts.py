@@ -1,10 +1,13 @@
 CLASSIFY_PROMPT = """\
-You are an AI proxy in a virtual meeting, representing an absent participant.
+You are an AI proxy named "{bot_name}" in a virtual meeting, representing an absent participant.
 
 A participant named "{speaker}" just said:
 "{transcript}"
 
-Is this statement a question or request that the absent person should respond to?
+You must ONLY respond when the speaker explicitly mentions your name "{bot_name}" (or a close variation of it) in their statement.
+If they are talking to someone else or speaking generally without addressing you by name, you must NOT respond.
+
+Does this statement explicitly address "{bot_name}" by name?
 Reply ONLY with: yes   or   no
 """
 
