@@ -210,6 +210,8 @@ async function injectBot(roomCode, proxySession) {
   };
   activeBots.set(roomCode, botInfo);
 
+  logger.info(`🤖 Bot "${botInfo.botName}" injected into room ${roomCode} | collection=${botInfo.collectionName || "NONE"}`);
+
   // Announce bot joined
   broadcastToRoom(roomCode, EVENTS.USER_JOINED, {
     socketId: `bot-${proxySession.id}`,
@@ -269,7 +271,11 @@ async function removeBot(roomCode) {
  */
 async function handleFinalTranscript(roomCode, speaker, text, meetingId) {
   const bot = activeBots.get(roomCode);
-  if (!bot || !bot.collectionName) return;
+  if (!bot) return;
+  if (!bot.collectionName) {
+    logger.warn(`🤖 Bot in room ${roomCode} has no collectionName — cannot respond`);
+    return;
+  }
 
   // Skip if bot is already processing or this is the bot speaking
   if (botProcessing.get(roomCode)) return;
@@ -379,6 +385,7 @@ async function handleFinalTranscript(roomCode, speaker, text, meetingId) {
 
   } catch (err) {
     logger.error(`Bot pipeline error for room ${roomCode}: ${err.message}`);
+    emitBotStatus(roomCode, "error");
   } finally {
     botProcessing.set(roomCode, false);
     emitBotStatus(roomCode, "idle");

@@ -236,6 +236,11 @@ function attachListeners(s) {
     store.addBotEvent({ type: "response", text: data.text, source: data.source, timestamp: data.timestamp });
     store.setBotStatus("idle");
 
+    // Show text response as toast so user always gets feedback
+    if (data.text) {
+      toast(data.text, { icon: "🤖", duration: 6000, style: { maxWidth: 420 } });
+    }
+
     if (data.audioBase64) {
       const audio = new Audio(`data:audio/mpeg;base64,${data.audioBase64}`);
       audio.play().catch(console.error);

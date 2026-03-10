@@ -38,6 +38,7 @@ export default function MeetingRoom() {
   const participants = useMeetingStore((s) => s.participants);
   const localStream = useMeetingStore((s) => s.localStream);
   const messages = useMeetingStore((s) => s.messages);
+  const botStatus = useMeetingStore((s) => s.botStatus);
   const [micOn, setMicOn] = useState(true);
   const [camOn, setCamOn] = useState(true);
   const [panel, setPanel] = useState(null);
@@ -350,6 +351,33 @@ export default function MeetingRoom() {
             style={{ position: "fixed", bottom: 100, fontSize: "2.5rem", pointerEvents: "none", zIndex: 100 }}
           >{r.emoji}</motion.div>
         ))}
+      </AnimatePresence>
+
+      {/* Bot status indicator */}
+      <AnimatePresence>
+        {botStatus && botStatus !== "idle" && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            style={{
+              position: "fixed", bottom: isMobile ? 80 : 90, left: "50%", transform: "translateX(-50%)",
+              display: "flex", alignItems: "center", gap: "0.5rem",
+              padding: "0.4rem 0.85rem", borderRadius: "2rem",
+              background: botStatus === "error" ? "rgba(255,80,80,0.15)" : "rgba(0,212,255,0.1)",
+              border: `1px solid ${botStatus === "error" ? "rgba(255,80,80,0.3)" : "rgba(0,212,255,0.25)"}`,
+              backdropFilter: "blur(12px)", zIndex: 40, pointerEvents: "none",
+            }}
+          >
+            {botStatus !== "error" && (
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                style={{ width: 14, height: 14, borderRadius: "50%", border: "2px solid rgba(0,212,255,0.3)", borderTopColor: "#00D4FF" }} />
+            )}
+            <span style={{ fontSize: "0.72rem", fontWeight: 600, color: botStatus === "error" ? "#FF5050" : "#00D4FF" }}>
+              {botStatus === "thinking" ? "🤖 Bot is thinking..." : botStatus === "speaking" ? "🤖 Bot is speaking..." : botStatus === "escalating" ? "📱 Escalating to WhatsApp..." : botStatus === "error" ? "⚠️ Bot error" : ""}
+            </span>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* ── Top bar ── */}

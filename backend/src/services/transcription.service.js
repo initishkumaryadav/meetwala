@@ -66,7 +66,7 @@ const transcriptionService = {
     });
 
     live.on(LiveTranscriptionEvents.Error, (err) => {
-      logger.error(`Deepgram error (${roomCode}):`, err);
+      logger.error(`Deepgram error (${roomCode}): ${err.message || err}`);
     });
 
     live.on(LiveTranscriptionEvents.Close, () => {
