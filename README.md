@@ -911,5 +911,5 @@ docker compose down -v
 ---
 
 <p align="center">
-  Built with ❤️ using React, Node.js, Python, LangChain, LangGraph, and a whole lot of WebSockets.
+   React, Node.js, Python, LangChain, LangGraph, and a whole lot of WebSockets.
 </p>
