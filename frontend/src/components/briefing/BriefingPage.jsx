@@ -7,6 +7,7 @@ import {
   FileText, Image, ArrowLeft, StopCircle,
 } from "lucide-react";
 import { proxyApi, briefingApi } from "../../services/api";
+import { useResponsive } from "../../hooks/useMediaQuery";
 import toast from "react-hot-toast";
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -31,6 +32,7 @@ export default function BriefingPage() {
   const bottomRef = useRef(null);
   const fileInputRef = useRef(null);
   const inputRef = useRef(null);
+  const { isMobile } = useResponsive();
 
   const { data: session } = useQuery({
     queryKey: ["proxy-session", sessionId],
@@ -232,24 +234,24 @@ export default function BriefingPage() {
       </div>
 
       {/* Header */}
-      <div style={{ borderBottom: "1px solid rgba(30,45,69,0.6)", padding: "0.65rem 1.25rem", display: "flex", alignItems: "center", gap: "0.75rem", background: "rgba(10,14,26,0.85)", backdropFilter: "blur(12px)", position: "relative", zIndex: 10 }}>
+      <div style={{ borderBottom: "1px solid rgba(30,45,69,0.6)", padding: isMobile ? "0.5rem 0.625rem" : "0.65rem 1.25rem", display: "flex", alignItems: "center", gap: isMobile ? "0.5rem" : "0.75rem", background: "rgba(10,14,26,0.85)", backdropFilter: "blur(12px)", position: "relative", zIndex: 10 }}>
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent, rgba(0,212,255,0.2), rgba(123,97,255,0.2), transparent)" }} />
 
         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleCancel}
-          style={{ width: 34, height: 34, borderRadius: "0.5rem", background: "rgba(90,106,138,0.1)", border: "1px solid rgba(30,45,69,0.5)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#5A6A8A", transition: "all 0.2s", flexShrink: 0 }}
+          style={{ width: isMobile ? 30 : 34, height: isMobile ? 30 : 34, borderRadius: "0.5rem", background: "rgba(90,106,138,0.1)", border: "1px solid rgba(30,45,69,0.5)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#5A6A8A", transition: "all 0.2s", flexShrink: 0 }}
           onMouseEnter={(e) => { e.currentTarget.style.color = "#E8F0FE"; e.currentTarget.style.borderColor = "rgba(0,212,255,0.3)"; }}
           onMouseLeave={(e) => { e.currentTarget.style.color = "#5A6A8A"; e.currentTarget.style.borderColor = "rgba(30,45,69,0.5)"; }}>
           <ArrowLeft size={16} />
         </motion.button>
 
         <motion.div animate={{ rotate: [0, 3, -3, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          style={{ width: 36, height: 36, background: "linear-gradient(135deg, #00D4FF, #7B61FF)", borderRadius: "0.625rem", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", boxShadow: "0 0 14px rgba(0,212,255,0.2)", flexShrink: 0 }}>
+          style={{ width: isMobile ? 30 : 36, height: isMobile ? 30 : 36, background: "linear-gradient(135deg, #00D4FF, #7B61FF)", borderRadius: "0.625rem", display: "flex", alignItems: "center", justifyContent: "center", fontSize: isMobile ? "0.9rem" : "1.1rem", boxShadow: "0 0 14px rgba(0,212,255,0.2)", flexShrink: 0 }}>
           🤖
         </motion.div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, color: "#E8F0FE", fontSize: "0.95rem" }}>Bot Briefing</h1>
-          <p style={{ color: "#5A6A8A", fontSize: "0.68rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <h1 style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, color: "#E8F0FE", fontSize: isMobile ? "0.82rem" : "0.95rem" }}>Bot Briefing</h1>
+          <p style={{ color: "#5A6A8A", fontSize: isMobile ? "0.6rem" : "0.68rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {session?.meeting?.title || "Loading..."}
           </p>
         </div>
@@ -268,17 +270,19 @@ export default function BriefingPage() {
           {voiceEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
         </motion.button>
 
+        {isMobile ? null : (
         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleCancel}
           style={{ padding: "0.35rem 0.7rem", borderRadius: "0.5rem", background: "rgba(255,80,80,0.08)", border: "1px solid rgba(255,80,80,0.2)", color: "#FF5050", cursor: "pointer", fontSize: "0.72rem", fontWeight: 600, display: "flex", alignItems: "center", gap: "0.25rem", transition: "all 0.2s", flexShrink: 0 }}
           onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,80,80,0.15)")}
           onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,80,80,0.08)")}>
           <X size={13} /> Cancel
         </motion.button>
+        )}
       </div>
 
       {/* Chat area */}
       <div style={{ flex: 1, overflowY: "auto", position: "relative" }}>
-        <div style={{ maxWidth: 740, width: "100%", margin: "0 auto", padding: "1.25rem 1rem", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+        <div style={{ maxWidth: 740, width: "100%", margin: "0 auto", padding: isMobile ? "1rem 0.625rem" : "1.25rem 1rem", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
           <AnimatePresence initial={false}>
             {messages.map((m, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
@@ -363,7 +367,7 @@ export default function BriefingPage() {
 
       {/* Input bar */}
       {!done && (
-        <div style={{ borderTop: "1px solid rgba(30,45,69,0.6)", background: "rgba(10,14,26,0.9)", backdropFilter: "blur(12px)", padding: "0.625rem 1rem", position: "relative", zIndex: 10 }}>
+        <div style={{ borderTop: "1px solid rgba(30,45,69,0.6)", background: "rgba(10,14,26,0.9)", backdropFilter: "blur(12px)", padding: isMobile ? "0.5rem 0.5rem" : "0.625rem 1rem", position: "relative", zIndex: 10 }}>
           <div style={{ maxWidth: 740, margin: "0 auto" }}>
             {/* Pending files preview */}
             <AnimatePresence>

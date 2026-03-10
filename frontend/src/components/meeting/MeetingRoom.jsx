@@ -15,6 +15,7 @@ import {
 } from "../../services/socket";
 import { useMeetingStore } from "../../store/meeting.store";
 import { useAuthStore } from "../../store/auth.store";
+import { useResponsive } from "../../hooks/useMediaQuery";
 import ParticipantTile from "./ParticipantTile";
 import toast from "react-hot-toast";
 
@@ -57,6 +58,7 @@ export default function MeetingRoom() {
   const recorderRef = useRef(null);
   const chatEndRef = useRef(null);
   const reactionIdRef = useRef(0);
+  const { isMobile, isTablet } = useResponsive();
 
   const { data: meeting } = useQuery({
     queryKey: ["meeting", roomCode],
@@ -321,6 +323,7 @@ export default function MeetingRoom() {
 
   const gridCols =
     totalTiles <= 1 ? "1fr" :
+    isMobile ? (totalTiles <= 2 ? "1fr" : "repeat(2, 1fr)") :
     totalTiles <= 2 ? "repeat(2, 1fr)" :
     totalTiles <= 4 ? "repeat(2, 1fr)" :
     totalTiles <= 9 ? "repeat(3, 1fr)" :
@@ -351,7 +354,7 @@ export default function MeetingRoom() {
 
       {/* ── Top bar ── */}
       <header style={{
-        height: 56, padding: "0 1rem", display: "flex", alignItems: "center", gap: "0.75rem",
+        height: isMobile ? 48 : 56, padding: isMobile ? "0 0.5rem" : "0 1rem", display: "flex", alignItems: "center", gap: isMobile ? "0.375rem" : "0.75rem",
         background: "rgba(10,14,26,0.85)", backdropFilter: "blur(20px)",
         borderBottom: "1px solid rgba(30,45,69,0.4)", position: "relative", zIndex: 20,
       }}>
@@ -362,7 +365,7 @@ export default function MeetingRoom() {
           <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#00FF94", boxShadow: "0 0 10px rgba(0,255,148,0.6)", animation: "pulse 2s infinite", flexShrink: 0 }} />
           <div style={{ minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <h1 style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, color: "#E8F0FE", fontSize: "0.95rem", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <h1 style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, color: "#E8F0FE", fontSize: isMobile ? "0.8rem" : "0.95rem", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: isMobile ? 100 : undefined }}>
                 {meeting?.title || "Meeting Room"}
               </h1>
               <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
@@ -405,6 +408,7 @@ export default function MeetingRoom() {
         </div>
 
         {/* Center — Timer */}
+        {!isMobile && (
         <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "rgba(20,28,46,0.5)", padding: "0.25rem 0.75rem", borderRadius: "2rem", border: "1px solid rgba(30,45,69,0.4)" }}>
             <Clock size={13} color="#5A6A8A" />
@@ -413,14 +417,15 @@ export default function MeetingRoom() {
             </span>
           </div>
         </div>
+        )}
 
         {/* Right — Panel toggles */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", flexShrink: 0, marginLeft: isMobile ? "auto" : undefined }}>
           {panelButtons.map((b) => (
             <motion.button key={b.id} whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
               onClick={() => setPanel((p) => p === b.id ? null : b.id)} title={b.label}
               style={{
-                position: "relative", width: 36, height: 36, borderRadius: "0.625rem",
+                position: "relative", width: isMobile ? 32 : 36, height: isMobile ? 32 : 36, borderRadius: "0.625rem",
                 border: `1px solid ${panel === b.id ? b.color + "40" : "rgba(30,45,69,0.4)"}`,
                 cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                 transition: "all 0.2s ease",
@@ -437,6 +442,8 @@ export default function MeetingRoom() {
             </motion.button>
           ))}
           <div style={{ width: 1, height: 24, background: "rgba(30,45,69,0.6)", margin: "0 0.25rem" }} />
+          {!isMobile && (
+          <>
           <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
             onClick={() => setLayoutMode((m) => m === "grid" ? "spotlight" : m === "spotlight" ? "auto" : "grid")}
             title={`Layout: ${layoutMode}`}
@@ -448,6 +455,8 @@ export default function MeetingRoom() {
             style={{ width: 36, height: 36, borderRadius: "0.625rem", border: "1px solid rgba(30,45,69,0.4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(20,28,46,0.4)", color: "#5A6A8A", transition: "all 0.2s" }}>
             {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </motion.button>
+          </>
+          )}
         </div>
       </header>
 
@@ -491,7 +500,8 @@ export default function MeetingRoom() {
               </div>
 
               {/* Sidebar thumbnails */}
-              <div style={{ width: 200, display: "flex", flexDirection: "column", gap: "0.5rem", overflowY: "auto", paddingRight: 2 }}>
+              {!isMobile && (
+              <div style={{ width: isTablet ? 150 : 200, display: "flex", flexDirection: "column", gap: "0.5rem", overflowY: "auto", paddingRight: 2 }}>
                 {pinnedParticipant !== "self" && pinnedParticipant && (
                   <motion.div whileHover={{ scale: 1.02 }} onClick={() => setPinnedParticipant("self")}
                     style={{ position: "relative", borderRadius: "0.75rem", overflow: "hidden", background: "#141C2E", border: "2px solid rgba(123,97,255,0.3)", aspectRatio: "16/10", cursor: "pointer", flexShrink: 0 }}>
@@ -523,6 +533,7 @@ export default function MeetingRoom() {
                   </motion.div>
                 ))}
               </div>
+              )}
             </div>
           ) : (
             /* ── Grid layout ── */
@@ -565,7 +576,7 @@ export default function MeetingRoom() {
           {layout === "spotlight" && pinnedParticipant && pinnedParticipant !== "self" && totalTiles <= 2 && (
             <motion.div drag dragMomentum={false}
               initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
-              style={{ position: "absolute", bottom: 16, right: 16, width: 200, height: 130, borderRadius: "0.875rem", overflow: "hidden", border: "2px solid rgba(123,97,255,0.4)", background: "#141C2E", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", cursor: "grab", zIndex: 10 }}>
+          style={{ position: "absolute", bottom: 16, right: 16, width: isMobile ? 140 : 200, height: isMobile ? 90 : 130, borderRadius: "0.875rem", overflow: "hidden", border: "2px solid rgba(123,97,255,0.4)", background: "#141C2E", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", cursor: "grab", zIndex: 10 }}>
               <video ref={(el) => { if (el && localStream) { el.srcObject = localStream; el.muted = true; el.play().catch(() => {}); } }}
                 autoPlay playsInline muted style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", transform: "scaleX(-1)" }} />
               {!camOn && (
@@ -582,10 +593,10 @@ export default function MeetingRoom() {
         {/* ── Side panel ── */}
         <AnimatePresence>
           {panel && (
-            <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: 380, opacity: 1 }} exit={{ width: 0, opacity: 0 }}
+            <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: isMobile ? "100%" : 380, opacity: 1 }} exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-              style={{ borderLeft: "1px solid rgba(30,45,69,0.4)", overflow: "hidden", flexShrink: 0, background: "rgba(13,18,32,0.95)", backdropFilter: "blur(20px)" }}>
-              <div style={{ width: 380, height: "100%", display: "flex", flexDirection: "column" }}>
+              style={{ borderLeft: isMobile ? "none" : "1px solid rgba(30,45,69,0.4)", overflow: "hidden", flexShrink: 0, background: "rgba(13,18,32,0.95)", backdropFilter: "blur(20px)", position: isMobile ? "absolute" : "relative", inset: isMobile ? 0 : undefined, zIndex: isMobile ? 30 : undefined }}>
+              <div style={{ width: isMobile ? "100%" : 380, height: "100%", display: "flex", flexDirection: "column" }}>
 
                 {panel === "chat" && (
                   <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -642,11 +653,13 @@ export default function MeetingRoom() {
 
       {/* ── Bottom controls bar ── */}
       <div style={{
-        height: 80, display: "flex", alignItems: "center", justifyContent: "center",
+        height: isMobile ? 64 : 80, display: "flex", alignItems: "center", justifyContent: "center",
         background: "rgba(10,14,26,0.9)", backdropFilter: "blur(20px)",
-        borderTop: "1px solid rgba(30,45,69,0.3)", position: "relative", zIndex: 20, gap: "0.5rem",
+        borderTop: "1px solid rgba(30,45,69,0.3)", position: "relative", zIndex: 20, gap: isMobile ? "0.25rem" : "0.5rem",
+        padding: isMobile ? "0 0.5rem" : undefined,
       }}>
         {/* Left info */}
+        {!isMobile && (
         <div style={{ position: "absolute", left: "1.25rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <span style={{ fontFamily: "DM Mono, monospace", fontSize: "0.75rem", color: "#5A6A8A" }}>{formatTime(elapsed)}</span>
           <div style={{ width: 1, height: 16, background: "rgba(30,45,69,0.6)" }} />
@@ -656,18 +669,19 @@ export default function MeetingRoom() {
             {roomCode} <Copy size={11} />
           </motion.button>
         </div>
+        )}
 
         {/* Center controls */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-          <ControlButton onClick={toggleMic} active={micOn} icon={micOn ? <Mic size={20} /> : <MicOff size={20} />} tooltip={micOn ? "Turn off microphone" : "Turn on microphone"} dangerWhenOff />
-          <ControlButton onClick={toggleCam} active={camOn} icon={camOn ? <Video size={20} /> : <VideoOff size={20} />} tooltip={camOn ? "Turn off camera" : "Turn on camera"} dangerWhenOff />
-          <ControlButton onClick={toggleScreenShare} active={isScreenSharing} activeColor="#00D4FF" icon={isScreenSharing ? <MonitorOff size={20} /> : <Monitor size={20} />} tooltip={isScreenSharing ? "Stop presenting" : "Present now"} />
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? "0.375rem" : "0.625rem" }}>
+          <ControlButton onClick={toggleMic} active={micOn} icon={micOn ? <Mic size={isMobile ? 18 : 20} /> : <MicOff size={isMobile ? 18 : 20} />} tooltip={micOn ? "Turn off microphone" : "Turn on microphone"} dangerWhenOff small={isMobile} />
+          <ControlButton onClick={toggleCam} active={camOn} icon={camOn ? <Video size={isMobile ? 18 : 20} /> : <VideoOff size={isMobile ? 18 : 20} />} tooltip={camOn ? "Turn off camera" : "Turn on camera"} dangerWhenOff small={isMobile} />
+          <ControlButton onClick={toggleScreenShare} active={isScreenSharing} activeColor="#00D4FF" icon={isScreenSharing ? <MonitorOff size={isMobile ? 18 : 20} /> : <Monitor size={isMobile ? 18 : 20} />} tooltip={isScreenSharing ? "Stop presenting" : "Present now"} small={isMobile} />
 
           <div style={{ width: 1, height: 28, background: "rgba(30,45,69,0.5)", margin: "0 0.125rem" }} />
 
           {/* Reactions */}
           <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
-            <ControlButton onClick={() => setShowReactions(!showReactions)} icon={<Smile size={20} />} tooltip="Reactions" />
+            <ControlButton onClick={() => setShowReactions(!showReactions)} icon={<Smile size={isMobile ? 18 : 20} />} tooltip="Reactions" small={isMobile} />
             <AnimatePresence>
               {showReactions && (
                 <motion.div initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.9 }}
@@ -686,19 +700,20 @@ export default function MeetingRoom() {
             </AnimatePresence>
           </div>
 
-          <ControlButton onClick={toggleRaiseHand} active={handRaised} activeColor="#FFBD00" icon={<Hand size={20} />} tooltip={handRaised ? "Lower hand" : "Raise hand"} />
+          <ControlButton onClick={toggleRaiseHand} active={handRaised} activeColor="#FFBD00" icon={<Hand size={isMobile ? 18 : 20} />} tooltip={handRaised ? "Lower hand" : "Raise hand"} small={isMobile} />
 
-          <div style={{ width: 1, height: 28, background: "rgba(30,45,69,0.5)", margin: "0 0.125rem" }} />
+          <div style={{ width: 1, height: isMobile ? 20 : 28, background: "rgba(30,45,69,0.5)", margin: "0 0.125rem" }} />
 
           {/* Leave */}
           <motion.button whileHover={{ scale: 1.06, boxShadow: "0 6px 24px rgba(239,68,68,0.4)" }} whileTap={{ scale: 0.94 }}
             onClick={handleLeave} title="Leave call"
-            style={{ height: 48, padding: "0 1.5rem", borderRadius: "2rem", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.5rem", background: "#DC2626", color: "white", fontWeight: 600, fontSize: "0.85rem", boxShadow: "0 4px 16px rgba(239,68,68,0.3)", transition: "all 0.2s" }}>
-            <PhoneOff size={18} /> <span>Leave</span>
+            style={{ height: isMobile ? 40 : 48, padding: isMobile ? "0 0.875rem" : "0 1.5rem", borderRadius: "2rem", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.5rem", background: "#DC2626", color: "white", fontWeight: 600, fontSize: isMobile ? "0.75rem" : "0.85rem", boxShadow: "0 4px 16px rgba(239,68,68,0.3)", transition: "all 0.2s" }}>
+            <PhoneOff size={isMobile ? 16 : 18} /> <span>{isMobile ? "" : "Leave"}</span>
           </motion.button>
         </div>
 
         {/* Right — More */}
+        {!isMobile && (
         <div style={{ position: "absolute", right: "1.25rem" }}>
           <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
             <ControlButton onClick={() => setShowMoreMenu(!showMoreMenu)} icon={<MoreVertical size={20} />} tooltip="More options" />
@@ -714,6 +729,7 @@ export default function MeetingRoom() {
             </AnimatePresence>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
@@ -721,13 +737,14 @@ export default function MeetingRoom() {
 
 /* ═══ Sub-components ═══ */
 
-function ControlButton({ onClick, active, activeColor, icon, tooltip, dangerWhenOff }) {
+function ControlButton({ onClick, active, activeColor, icon, tooltip, dangerWhenOff, small }) {
   const isOff = dangerWhenOff && !active;
   const isActive = active && activeColor;
+  const size = small ? 40 : 48;
   return (
     <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={onClick} title={tooltip}
       style={{
-        width: 48, height: 48, borderRadius: "50%", border: "none", cursor: "pointer",
+        width: size, height: size, borderRadius: "50%", border: "none", cursor: "pointer",
         display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s ease",
         background: isOff ? "rgba(220,38,38,0.15)" : isActive ? activeColor + "20" : "rgba(30,45,69,0.5)",
         color: isOff ? "#f87171" : isActive ? activeColor : "#E8F0FE",

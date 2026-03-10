@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, LogOut, Video, Bot, Users, Copy, Send, ArrowRight, Calendar, CheckCircle2, Activity, X, Download, Zap, Clock, Share2, Link, ExternalLink } from "lucide-react";
 import { meetingApi, proxyApi } from "../../services/api";
 import { useAuthStore } from "../../store/auth.store";
+import { useResponsive } from "../../hooks/useMediaQuery";
 import ThemedCalendar from "../shared/ThemedCalendar";
 import toast from "react-hot-toast";
 
@@ -21,6 +22,7 @@ export default function Dashboard() {
   const [botName, setBotName]           = useState("");
   const [meetingMode, setMeetingMode]   = useState("instant"); // "instant" | "schedule"
   const [createdMeeting, setCreatedMeeting] = useState(null); // holds created meeting for share view
+  const { isMobile, isTablet } = useResponsive();
 
   const { data: meetings = [] } = useQuery({
     queryKey: ["meetings"],
@@ -140,53 +142,58 @@ export default function Dashboard() {
       </div>
 
       {/* Navbar */}
-      <nav style={{ borderBottom: "1px solid rgba(30,45,69,0.6)", padding: "0.875rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", backdropFilter: "blur(12px)", background: "rgba(10,14,26,0.8)" }}>
+      <nav style={{ borderBottom: "1px solid rgba(30,45,69,0.6)", padding: isMobile ? "0.625rem 0.75rem" : "0.875rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", backdropFilter: "blur(12px)", background: "rgba(10,14,26,0.8)", gap: "0.5rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           <motion.div
             animate={{ rotate: [0, 5, -5, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             style={{ width: 38, height: 38, background: "linear-gradient(135deg, #00D4FF, #7B61FF)", borderRadius: "0.75rem", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", boxShadow: "0 0 20px rgba(0,212,255,0.2)" }}
           >🤖</motion.div>
-          <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "1.3rem" }}>
+          <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: isMobile ? "1rem" : "1.3rem" }}>
             <span className="gradient-text">MeetWala</span>
           </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <div className="glass-card-static" style={{ padding: "0.375rem 0.875rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            {user?.avatarUrl && <img src={user.avatarUrl} style={{ width: 26, height: 26, borderRadius: "50%", border: "2px solid rgba(0,212,255,0.3)" }} alt="" />}
-            <span style={{ fontSize: "0.85rem", color: "#E8F0FE", fontWeight: 500 }}>{user?.name}</span>
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          {!isMobile && (
+            <div className="glass-card-static" style={{ padding: "0.375rem 0.875rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              {user?.avatarUrl && <img src={user.avatarUrl} style={{ width: 26, height: 26, borderRadius: "50%", border: "2px solid rgba(0,212,255,0.3)" }} alt="" />}
+              <span style={{ fontSize: "0.85rem", color: "#E8F0FE", fontWeight: 500 }}>{user?.name}</span>
+            </div>
+          )}
+          {isMobile && user?.avatarUrl && (
+            <img src={user.avatarUrl} style={{ width: 28, height: 28, borderRadius: "50%", border: "2px solid rgba(0,212,255,0.3)" }} alt="" />
+          )}
           <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={logout} className="btn-secondary" style={{ padding: "0.5rem 0.75rem" }}>
             <LogOut size={16} />
           </motion.button>
         </div>
       </nav>
 
-      <main style={{ maxWidth: 1140, margin: "0 auto", padding: "2.5rem 1.5rem", position: "relative" }}>
+      <main style={{ maxWidth: 1140, margin: "0 auto", padding: isMobile ? "1.25rem 0.75rem" : isTablet ? "1.75rem 1rem" : "2.5rem 1.5rem", position: "relative" }}>
         {/* Header row */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-          style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "2.5rem" }}>
+          style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "stretch" : "flex-end", marginBottom: isMobile ? "1.5rem" : "2.5rem", gap: isMobile ? "1rem" : "0" }}>
           <div>
-            <h2 style={{ fontFamily: "Syne, sans-serif", fontSize: "2rem", fontWeight: 700, color: "#E8F0FE", lineHeight: 1.2 }}>
+            <h2 style={{ fontFamily: "Syne, sans-serif", fontSize: isMobile ? "1.4rem" : "2rem", fontWeight: 700, color: "#E8F0FE", lineHeight: 1.2 }}>
               Welcome back, <span className="gradient-text">{user?.name?.split(" ")[0]}</span>
             </h2>
             <p style={{ color: "#5A6A8A", marginTop: "0.375rem", fontSize: "0.9rem" }}>Your AI proxy is ready to represent you.</p>
           </div>
           <div style={{ display: "flex", gap: "0.75rem" }}>
-            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => setShowJoin(true)} className="btn-secondary" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <Users size={18} /> Join Meeting
+            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => setShowJoin(true)} className="btn-secondary" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", flex: isMobile ? 1 : undefined, fontSize: isMobile ? "0.8rem" : undefined, padding: isMobile ? "0.5rem 0.75rem" : undefined }}>
+              <Users size={isMobile ? 16 : 18} /> Join Meeting
             </motion.button>
-            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => setShowCreate(true)} className="btn-primary" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <Plus size={18} /> New Meeting
+            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={() => setShowCreate(true)} className="btn-primary" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", flex: isMobile ? 1 : undefined, fontSize: isMobile ? "0.8rem" : undefined, padding: isMobile ? "0.5rem 0.75rem" : undefined }}>
+              <Plus size={isMobile ? 16 : 18} /> New Meeting
             </motion.button>
           </div>
         </motion.div>
 
         {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "2.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : isTablet ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? "0.625rem" : "1rem", marginBottom: isMobile ? "1.5rem" : "2.5rem" }}>
           {statCards.map((s, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08, duration: 0.5 }}
-              className="glass-card shimmer" style={{ padding: "1.25rem", position: "relative", overflow: "hidden", cursor: "default" }}>
+              className="glass-card shimmer" style={{ padding: isMobile ? "0.875rem" : "1.25rem", position: "relative", overflow: "hidden", cursor: "default" }}>
               <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80, borderRadius: "50%", background: s.glow, filter: "blur(20px)" }} />
               <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.75rem", position: "relative" }}>
                 <div style={{ width: 36, height: 36, borderRadius: "0.625rem", background: s.glow, display: "flex", alignItems: "center", justifyContent: "center", color: s.color }}>
@@ -200,7 +207,7 @@ export default function Dashboard() {
         </div>
 
         {/* Two column layout */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile || isTablet ? "1fr" : "1fr 1fr", gap: isMobile ? "1rem" : "1.5rem" }}>
 
           {/* Meetings */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.5 }}

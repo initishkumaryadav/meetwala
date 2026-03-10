@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Sparkles, Zap, Shield, Globe } from "lucide-react";
 import { useAuthStore } from "../../store/auth.store";
 import { authApi } from "../../services/api";
+import { useResponsive } from "../../hooks/useMediaQuery";
 
 function FloatingOrb({ delay, size, x, y, color }) {
   return (
@@ -29,6 +30,7 @@ export default function LoginPage() {
   const [params]  = useSearchParams();
   const navigate  = useNavigate();
   const { setToken, setUser, token } = useAuthStore();
+  const { isMobile } = useResponsive();
 
   useEffect(() => {
     const t = params.get("token");
@@ -77,7 +79,7 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="glass-card"
-          style={{ padding: "3rem 2.5rem", width: "100%", maxWidth: 440, textAlign: "center", position: "relative" }}
+          style={{ padding: isMobile ? "2rem 1.25rem" : "3rem 2.5rem", width: "100%", maxWidth: 440, textAlign: "center", position: "relative" }}
         >
           {/* Animated border glow */}
           <div style={{
@@ -94,7 +96,7 @@ export default function LoginPage() {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
             <div style={{
-              width: 72, height: 72, borderRadius: "1.25rem",
+              width: isMobile ? 56 : 72, height: isMobile ? 56 : 72, borderRadius: "1.25rem",
               background: "linear-gradient(135deg, #00D4FF, #7B61FF)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "2.25rem",
@@ -103,7 +105,7 @@ export default function LoginPage() {
             }}>🤖</div>
           </motion.div>
 
-          <h1 style={{ fontFamily: "Syne, sans-serif", fontSize: "2.25rem", fontWeight: 800, marginBottom: "0.5rem" }}>
+          <h1 style={{ fontFamily: "Syne, sans-serif", fontSize: isMobile ? "1.75rem" : "2.25rem", fontWeight: 800, marginBottom: "0.5rem" }}>
             <span className="gradient-text">MeetWala</span>
           </h1>
           <p style={{ color: "#5A6A8A", fontSize: "0.9rem", marginBottom: "0.25rem", lineHeight: 1.6 }}>
@@ -145,7 +147,7 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
-          style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", justifyContent: "center" }}
+          style={{ display: "flex", gap: isMobile ? "0.5rem" : "0.75rem", flexWrap: "wrap", justifyContent: "center" }}
         >
           {FEATURES.map((f, i) => (
             <motion.div
@@ -157,12 +159,12 @@ export default function LoginPage() {
                 display: "flex", alignItems: "center", gap: "0.5rem",
                 background: "rgba(20,28,46,0.5)", backdropFilter: "blur(8px)",
                 border: "1px solid rgba(30,45,69,0.6)", borderRadius: "2rem",
-                padding: "0.5rem 1rem",
+                padding: isMobile ? "0.4rem 0.75rem" : "0.5rem 1rem",
               }}
             >
               <f.icon size={14} color="#00D4FF" />
-              <span style={{ fontSize: "0.75rem", color: "#8A95AD" }}>
-                <strong style={{ color: "#C3CBE0" }}>{f.label}</strong> — {f.desc}
+              <span style={{ fontSize: isMobile ? "0.65rem" : "0.75rem", color: "#8A95AD" }}>
+                <strong style={{ color: "#C3CBE0" }}>{f.label}</strong>{isMobile ? "" : " — " + f.desc}
               </span>
             </motion.div>
           ))}
