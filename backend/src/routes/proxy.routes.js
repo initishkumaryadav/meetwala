@@ -6,12 +6,13 @@ const { injectBot, removeBot } = require("../socket/socket.server");
 // Create a proxy session for a meeting
 router.post("/", requireAuth, async (req, res, next) => {
   try {
-    const { meetingId, botName } = req.body;
+    const { meetingId, botName, whatsappPhone } = req.body;
     const session = await prisma.proxySession.create({
       data: {
         meetingId,
         userId:  req.user.id,
         botName: botName || `${req.user.name}'s Bot`,
+        whatsappPhone: whatsappPhone || null,
       },
     });
     res.status(201).json({ session });

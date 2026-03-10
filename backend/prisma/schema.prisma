@@ -41,13 +41,14 @@ model Meeting {
 }
 
 model ProxySession {
-  id        String   @id @default(uuid())
-  meetingId String
-  userId    String
-  status    String   @default("IDLE") // IDLE | BRIEFED | ACTIVE | ESCALATING | COMPLETED
-  botName   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(uuid())
+  meetingId     String
+  userId        String
+  status        String   @default("IDLE") // IDLE | BRIEFED | ACTIVE | ESCALATING | COMPLETED
+  botName       String?
+  whatsappPhone String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   meeting   Meeting        @relation(fields: [meetingId], references: [id])
   user      User           @relation(fields: [userId], references: [id])

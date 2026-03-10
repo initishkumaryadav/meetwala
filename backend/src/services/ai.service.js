@@ -44,13 +44,14 @@ const aiService = {
     return data;
   },
 
-  async respondToTranscript({ proxy_session_id, meeting_id, collection_name, transcript, speaker }) {
+  async respondToTranscript({ proxy_session_id, meeting_id, collection_name, transcript, speaker, bot_name }) {
     const { data } = await client.post("/respond/meeting", {
       proxy_session_id,
       meeting_id,
       collection_name,
       transcript,
       speaker,
+      bot_name,
     });
     return data;
   },

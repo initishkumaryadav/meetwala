@@ -207,6 +207,7 @@ async function injectBot(roomCode, proxySession) {
     botName:        proxySession.botName || "AI Proxy",
     collectionName: proxySession.briefing?.chromaCollectionId,
     meetingId:      proxySession.meetingId,
+    whatsappPhone:  proxySession.whatsappPhone || null,
   };
   activeBots.set(roomCode, botInfo);
 
@@ -291,13 +292,39 @@ async function handleFinalTranscript(roomCode, speaker, text, meetingId) {
       collection_name:  bot.collectionName,
       transcript:       text,
       speaker,
+      bot_name:         bot.botName || "AI Proxy",
     });
 
     if (result.should_escalate) {
-      // Escalate to WhatsApp
-      emitBotStatus(roomCode, "escalating");
+      // Speak the interim response in the meeting first
+      if (result.bot_response) {
+        emitBotStatus(roomCode, "speaking");
 
-      const user = await prisma.user.findUnique({ where: { id: bot.userId } });
+        let escalateAudio = null;
+        try {
+          escalateAudio = await services().ai.synthesizeSpeech(result.bot_response);
+        } catch { /* TTS optional */ }
+
+        broadcastToRoom(roomCode, EVENTS.BOT_RESPONSE, {
+          text:        result.bot_response,
+          audioBase64: escalateAudio,
+          source:      "escalation",
+          confidence:  result.confidence,
+          timestamp:   new Date().toISOString(),
+        });
+
+        // Save the interim response as a transcript entry
+        await prisma.transcriptEntry.create({
+          data: { meetingId: bot.meetingId, speaker: bot.botName, text: result.bot_response, isFinal: true },
+        });
+
+        broadcastToRoom(roomCode, EVENTS.TRANSCRIPT_UPDATE, {
+          speaker: bot.botName, text: result.bot_response, isFinal: true, timestamp: new Date().toISOString(),
+        });
+      }
+
+      // Now escalate to WhatsApp
+      emitBotStatus(roomCode, "escalating");
 
       // Save query to DB
       const waQuery = await prisma.whatsAppQuery.create({
@@ -314,10 +341,10 @@ async function handleFinalTranscript(roomCode, speaker, text, meetingId) {
       });
 
       // Send WhatsApp if phone available
-      if (user?.whatsappPhone) {
+      if (bot.whatsappPhone) {
         try {
           await services().whatsapp.sendMessage(
-            user.whatsappPhone,
+            bot.whatsappPhone,
             `🤖 MeetWala Bot\n\nSomeone in your meeting asked:\n"${text}"\n\nI'm not confident enough to answer. Please reply with your response.`
           );
 
