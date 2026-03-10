@@ -1,8 +1,9 @@
 import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { X } from "lucide-react";
 import { useMeetingStore } from "../../store/meeting.store";
 
-export default function TranscriptPanel() {
+export default function TranscriptPanel({ onClose }) {
   const { transcript } = useMeetingStore();
   const bottomRef = useRef(null);
 
@@ -11,12 +12,19 @@ export default function TranscriptPanel() {
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column", background: "rgba(17,24,39,0.5)" }}>
 
-      <div style={{ padding: "0.875rem 1rem", borderBottom: "1px solid rgba(30,45,69,0.6)", background: "rgba(10,14,26,0.5)" }}>
-        <h3 style={{ fontFamily: "Syne, sans-serif", fontWeight: 600, fontSize: "0.85rem", color: "#E8F0FE", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#00D4FF" }} />
-          Live Transcript
-        </h3>
-        <p style={{ fontSize: "0.65rem", color: "#5A6A8A", marginTop: "0.15rem" }}>Powered by Deepgram Nova-2</p>
+      <div style={{ padding: "0.875rem 1rem", borderBottom: "1px solid rgba(30,45,69,0.6)", background: "rgba(10,14,26,0.5)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <h3 style={{ fontFamily: "Syne, sans-serif", fontWeight: 600, fontSize: "0.85rem", color: "#E8F0FE", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#00D4FF" }} />
+            Live Transcript
+          </h3>
+          <p style={{ fontSize: "0.65rem", color: "#5A6A8A", marginTop: "0.15rem" }}>Powered by Deepgram Nova-2</p>
+        </div>
+        {onClose && (
+          <button onClick={onClose} style={{ background: "rgba(255,255,255,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#8899AA" }}>
+            <X size={14} />
+          </button>
+        )}
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "0.875rem 1rem", display: "flex", flexDirection: "column", gap: "0.625rem" }}>

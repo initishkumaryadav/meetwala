@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { PhoneCall } from "lucide-react";
+import { PhoneCall, X } from "lucide-react";
 import { useMeetingStore } from "../../store/meeting.store";
 
 const STATUS = {
@@ -15,7 +15,7 @@ const EVENT_ICONS = {
   whatsapp_replied: "✅",
 };
 
-export default function BotStatusPanel() {
+export default function BotStatusPanel({ onClose }) {
   const { botStatus, botEvents, lastBotResponse, isWhatsAppPending } = useMeetingStore();
   const cfg = STATUS[botStatus] || STATUS.idle;
 
@@ -25,10 +25,15 @@ export default function BotStatusPanel() {
       {/* Header */}
       <div style={{ padding: "0.875rem 1rem", borderBottom: "1px solid rgba(30,45,69,0.6)", display: "flex", alignItems: "center", gap: "0.75rem", background: "rgba(10,14,26,0.5)" }}>
         <div style={{ width: 32, height: 32, background: "linear-gradient(135deg, #00D4FF, #7B61FF)", borderRadius: "0.625rem", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 12px rgba(0,212,255,0.15)" }}>🤖</div>
-        <div>
+        <div style={{ flex: 1 }}>
           <p style={{ fontFamily: "Syne, sans-serif", fontWeight: 600, fontSize: "0.85rem", color: "#E8F0FE" }}>AI Proxy Bot</p>
           <p style={{ fontSize: "0.65rem", color: "#5A6A8A" }}>Activity Monitor</p>
         </div>
+        {onClose && (
+          <button onClick={onClose} style={{ background: "rgba(255,255,255,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#8899AA", flexShrink: 0 }}>
+            <X size={14} />
+          </button>
+        )}
       </div>
 
       {/* Status badge */}
