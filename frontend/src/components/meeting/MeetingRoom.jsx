@@ -3,10 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Bot, Copy,
+  Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, Copy,
   Send, Monitor, MonitorOff, Hand, Users, Smile, MoreVertical, Info,
   Pin, PinOff, Maximize2, Minimize2, Clock, Shield, ChevronDown,
-  X, Layout, Grid3X3, Rows3,
+  X, Layout, Grid3X3,
 } from "lucide-react";
 import { meetingApi } from "../../services/api";
 import {
@@ -15,8 +15,6 @@ import {
 } from "../../services/socket";
 import { useMeetingStore } from "../../store/meeting.store";
 import { useAuthStore } from "../../store/auth.store";
-import BotStatusPanel from "./BotStatusPanel";
-import TranscriptPanel from "./TranscriptPanel";
 import ParticipantTile from "./ParticipantTile";
 import toast from "react-hot-toast";
 
@@ -224,7 +222,7 @@ export default function MeetingRoom() {
   };
 
   const handleSendChat = (e) => {
-    e.preventDefault();
+    if (e?.preventDefault) e.preventDefault();
     if (!chatMsg.trim()) return;
     sendChatMessage(roomCode, chatMsg.trim());
     setChatMsg("");
@@ -333,8 +331,6 @@ export default function MeetingRoom() {
   const panelButtons = [
     { id: "chat", icon: <MessageSquare size={18} />, color: "#00FF94", label: "Chat" },
     { id: "participants", icon: <Users size={18} />, color: "#00D4FF", label: "Participants" },
-    { id: "transcript", icon: <Rows3 size={18} />, color: "#A78BFA", label: "Transcript" },
-    { id: "bot", icon: <Bot size={18} />, color: "#7B61FF", label: "Bot" },
   ];
 
   return (
@@ -609,17 +605,19 @@ export default function MeetingRoom() {
                       ))}
                       <div ref={chatEndRef} />
                     </div>
-                    <form onSubmit={handleSendChat} style={{ padding: "0.625rem 0.75rem", borderTop: "1px solid rgba(30,45,69,0.4)", display: "flex", gap: "0.375rem", background: "rgba(10,14,26,0.5)" }}>
+                    <div style={{ padding: "0.625rem 0.75rem", borderTop: "1px solid rgba(30,45,69,0.4)", display: "flex", gap: "0.375rem", background: "rgba(10,14,26,0.5)" }}>
                       <input value={chatMsg} onChange={(e) => setChatMsg(e.target.value)}
                         placeholder="Send a message to everyone"
+                        onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendChat(e); } }}
                         style={{ flex: 1, background: "rgba(20,28,46,0.6)", border: "1px solid rgba(30,45,69,0.4)", borderRadius: "1.5rem", padding: "0.5rem 0.875rem", color: "#E8F0FE", fontSize: "0.82rem", outline: "none", transition: "border-color 0.2s" }}
                         onFocus={(e) => (e.target.style.borderColor = "rgba(123,97,255,0.4)")}
                         onBlur={(e) => (e.target.style.borderColor = "rgba(30,45,69,0.4)")} />
-                      <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }} type="submit" disabled={!chatMsg.trim()}
+                      <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
+                        onClick={handleSendChat}
                         style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: chatMsg.trim() ? "linear-gradient(135deg, #7B61FF, #00D4FF)" : "rgba(30,45,69,0.4)", color: "white", cursor: chatMsg.trim() ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: chatMsg.trim() ? "0 2px 12px rgba(123,97,255,0.3)" : "none", transition: "all 0.2s" }}>
                         <Send size={15} />
                       </motion.button>
-                    </form>
+                    </div>
                   </div>
                 )}
 
@@ -635,8 +633,7 @@ export default function MeetingRoom() {
                   </div>
                 )}
 
-                {panel === "transcript" && <TranscriptPanel onClose={() => setPanel(null)} />}
-                {panel === "bot" && <BotStatusPanel onClose={() => setPanel(null)} />}
+
               </div>
             </motion.div>
           )}
