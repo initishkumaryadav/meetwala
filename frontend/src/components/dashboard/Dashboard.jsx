@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [joinCode, setJoinCode]         = useState("");
   const [selectedMeeting, setSelectedMeeting] = useState(null);
   const [botName, setBotName]           = useState("");
+  const [whatsappPhone, setWhatsappPhone] = useState("");
   const [meetingMode, setMeetingMode]   = useState("instant"); // "instant" | "schedule"
   const [createdMeeting, setCreatedMeeting] = useState(null); // holds created meeting for share view
   const { isMobile, isTablet } = useResponsive();
@@ -62,11 +63,12 @@ export default function Dashboard() {
   });
 
   const createProxy = useMutation({
-    mutationFn: () => proxyApi.create({ meetingId: selectedMeeting.id, botName: botName || undefined }),
+    mutationFn: () => proxyApi.create({ meetingId: selectedMeeting.id, botName: botName || undefined, whatsappPhone: whatsappPhone || undefined }),
     onSuccess: (r) => {
       qc.invalidateQueries({ queryKey: ["proxy-sessions"] });
       setShowSendBot(false);
       setBotName("");
+      setWhatsappPhone("");
       setSelectedMeeting(null);
       toast.success("Proxy session created! Complete the briefing to activate.");
       navigate(`/brief/${r.data.session.id}`);
@@ -144,11 +146,7 @@ export default function Dashboard() {
       {/* Navbar */}
       <nav style={{ borderBottom: "1px solid rgba(30,45,69,0.6)", padding: isMobile ? "0.625rem 0.75rem" : "0.875rem 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", backdropFilter: "blur(12px)", background: "rgba(10,14,26,0.8)", gap: "0.5rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <motion.div
-            animate={{ rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            style={{ width: 38, height: 38, background: "linear-gradient(135deg, #00D4FF, #7B61FF)", borderRadius: "0.75rem", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", boxShadow: "0 0 20px rgba(0,212,255,0.2)" }}
-          >🤖</motion.div>
+          <img src="/jaiLogo.webp" alt="MeetWala" style={{ width: 38, height: 38, borderRadius: "0.75rem", objectFit: "cover" }} />
           <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: isMobile ? "1rem" : "1.3rem" }}>
             <span className="gradient-text">MeetWala</span>
           </span>
@@ -574,6 +572,8 @@ export default function Dashboard() {
               <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 <input className="input-field" placeholder={`${user?.name}'s Bot`} value={botName}
                   onChange={(e) => setBotName(e.target.value)} />
+                <input className="input-field" placeholder="WhatsApp number (e.g. +91XXXXXXXXXX)" value={whatsappPhone}
+                  onChange={(e) => setWhatsappPhone(e.target.value)} type="tel" />
                 <div style={{ display: "flex", gap: "0.75rem", paddingTop: "0.5rem" }}>
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => { setShowSendBot(false); setSelectedMeeting(null); }} className="btn-secondary" style={{ flex: 1 }}>Cancel</motion.button>
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => createProxy.mutate()} disabled={createProxy.isPending}

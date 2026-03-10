@@ -19,6 +19,7 @@ class RespondRequest(BaseModel):
     collection_name:  str
     transcript:       str
     speaker:          str
+    bot_name:         str = "AI Proxy"
 
 
 class WaReplyRequest(BaseModel):
@@ -42,6 +43,7 @@ async def respond_to_transcript(req: RespondRequest):
         "collection_name":     req.collection_name,
         "transcript":          req.transcript,
         "speaker":             req.speaker,
+        "bot_name":            req.bot_name,
         "is_directed_at_bot":  False,
         "retrieved_chunks":    [],
         "confidence_score":    0.0,
