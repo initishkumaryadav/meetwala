@@ -4,10 +4,17 @@ You are an AI proxy named "{bot_name}" in a virtual meeting, representing an abs
 A participant named "{speaker}" just said:
 "{transcript}"
 
-You must ONLY respond when the speaker explicitly mentions your name "{bot_name}" (or a close variation of it) in their statement.
-If they are talking to someone else or speaking generally without addressing you by name, you must NOT respond.
+Should you respond to this? Respond YES if:
+- The speaker asks a question (to anyone, including the group)
+- The speaker addresses you by name ("{bot_name}" or a close variation)
+- The speaker asks for information, opinions, or input that the absent person would know
+- The statement is directed at the absent person you are representing
 
-Does this statement explicitly address "{bot_name}" by name?
+Respond NO only if:
+- It is casual chit-chat between other participants not involving you
+- It is a procedural statement like "let me share my screen" or "can everyone hear me"
+- The speaker is clearly talking to a specific other person (not you)
+
 Reply ONLY with: yes   or   no
 """
 

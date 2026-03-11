@@ -44,12 +44,6 @@ async def classify_node(state: BotState) -> dict:
     llm    = get_llm(temperature=0.0)
     bot_name = state.get("bot_name", "AI Proxy")
 
-    # Quick check: if the bot's name isn't mentioned at all, skip LLM call
-    transcript_lower = state["transcript"].lower()
-    if bot_name.lower() not in transcript_lower:
-        logger.debug(f"🎯 Classify: name '{bot_name}' not in transcript — skipping")
-        return {"is_directed_at_bot": False}
-
     prompt = CLASSIFY_PROMPT.format(
         speaker=state["speaker"],
         transcript=state["transcript"],
